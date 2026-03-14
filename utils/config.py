@@ -64,7 +64,7 @@ import base64
 def get_userData():
     # 1. 从环境变量获取数据
     user_data_raw = os.getenv("USER_DATA", "").strip()
-    
+    print(f"DEBUG: 接收到的 USER_DATA 字符串长度: {len(user_data_raw)}")
     if not user_data_raw:
         return []
 
