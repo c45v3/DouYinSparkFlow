@@ -57,31 +57,28 @@ def get_config():
     return config
 
 
+import os
+import json
+import base64
+
 def get_userData():
-    """
-    获取用户数据目录
-    :return: 用户数据目录路径
-    """
-    global userData
+    # 1. 从环境变量获取数据
+    user_data_raw = os.getenv("USER_DATA", "").strip()
     
-    if userData:
-        return userData
-    
-    userDataFile = USERDATAFILE
-    userDataJson = ""
+    if not user_data_raw:
+        return []
 
-    env = get_environment()
-
-    if env == Environment.GITHUBACTION:
-        userDataJson = os.getenv("USER_DATA", None)
-        if not userDataJson:
-            logger.error("环境变量 USER_DATA 未设置")
-            exit(1)
-    else:
-        if env == Environment.PACKED:
-            userDataFile = os.path.join(os.path.dirname(sys.executable), USERDATAFILE)
-        with open(userDataFile, "r", encoding="utf-8") as f:
-            userDataJson = f.read()
-
-    userData = json.loads(userDataJson)
-    return userData
+    try:
+        # 2. 尝试 Base64 解码
+        # 如果是 Base64 编码，这里会成功
+        decoded_bytes = base64.b64decode(user_data_raw, validate=True)
+        decoded_str = decoded_bytes.decode('utf-8')
+        return json.loads(decoded_str)
+    except Exception:
+        # 3. 如果解码失败（例如之前手动填入的明文 JSON），则直接解析
+        try:
+            return json.loads(user_data_raw)
+        except json.JSONDecodeError as e:
+            # 记录错误方便排查，但不要崩溃
+            print(f"解析 USER_DATA 失败: {e}")
+            return []
