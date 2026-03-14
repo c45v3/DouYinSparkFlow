@@ -2,7 +2,7 @@
   "multiTask": true,
   "taskCount": 5,
   "proxyAddress": "",
-  "messageTemplate": "[盖瑞]自动火花完成！[加一]\n位置：[COUNTRY] [DC] [IP]\n—— [右边] 每日一言 [左边] ——\n[API]",
+  "messageTemplate": "[盖瑞]自动火花完成！[加一]\n—— [右边] 每日一言 [左边] ——\n[API]",
   "hitokotoTypes": [
     "文学",
     "影视",
@@ -11,6 +11,6 @@
   ],
   "happyNewYear": {
       "enabled": true,
-      "messageTemplate": "【[data]|[data_lunar]】\n[烟花]环境：[COUNTRY]-[DC]\n[福]专属祝福：[API]"
+      "messageTemplate": "【[data]|[data_lunar]】\n[烟花]今日专属祝福[福]：\n[API]"
   }
 }
