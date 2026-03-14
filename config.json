@@ -2,7 +2,7 @@
   "multiTask": true,
   "taskCount": 5,
   "proxyAddress": "",
-  "messageTemplate": "[盖瑞]自动火花完成！[加一]\n位置：[COUNTRY] | 节点：[DC]\n地址：[IP]\n—— [右边] 每日一言 [左边] ——\n[API]",
+  "messageTemplate": "[盖瑞]自动火花完成！[加一]\n位置：[COUNTRY] [DC] [IP]\n—— [右边] 每日一言 [左边] ——\n[API]",
   "hitokotoTypes": [
     "文学",
     "影视",
