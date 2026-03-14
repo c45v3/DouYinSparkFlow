@@ -57,6 +57,56 @@ def get_config():
     return config
 
 
+def get_userData():
+    """
+    获取用户数据目录
+    :return: 用户数据目录路径
+    """
+    global userData
+    
+    if userData:
+        return userData
+    
+    userDataFile = USERDATAFILE
+    userDataJson = ""
+
+    env = get_environment()
+
+    if env == Environment.GITHUBACTION:
+        userDataJson = os.getenv("USER_DATA", None)
+        if not userDataJson:
+            logger.error("环境变量 USER_DATA 未设置")
+            exit(1)
+    else:
+        if env == Environment.PACKED:
+            userDataFile = os.path.join(os.path.dirname(sys.executable), USERDATAFILE)
+        with open(userDataFile, "r", encoding="utf-8") as f:
+            userDataJson = f.read()
+
+    userData = json.loads(userDataJson)
+    return userData
+def get_config():
+    """
+    获取配置信息
+    :return: 配置字典
+    """
+    global config
+    
+    if config:
+        return config
+    
+    env = get_environment()
+
+    configFile = CONFIGFILE
+
+    if env == Environment.PACKED:
+        configFile = os.path.join(os.path.dirname(sys.executable), CONFIGFILE)
+
+    with open(configFile, "r", encoding="utf-8") as f:
+        config = json.loads(f.read())
+    return config
+
+
 import os
 import json
 import base64
