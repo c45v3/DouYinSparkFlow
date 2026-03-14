@@ -163,7 +163,8 @@ async def do_user_task(browser, username, cookies, targets, semaphore):
             delay=5,
             url="https://creator.douyin.com/creator-micro/data/following/chat",
         )
-
+        logger.info(f"当前页面标题: {await page.title()}")
+        logger.info(f"当前页面 URL: {page.url}")
         logger.info(f"账号 {username} 开始发送消息")
         # 滚动并选择用户
         async for username in scroll_and_select_user(page, username, targets):
