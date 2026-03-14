@@ -27,11 +27,6 @@ jobs:
       env:
         USER_DATA: ${{ secrets.USER_DATA }}
       run: python main.py --doTask
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: run-logs
-        path: logs/
   workflow-keepalive:
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
