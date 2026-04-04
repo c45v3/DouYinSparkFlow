@@ -1,32 +1,54 @@
 name: DouYin Spark Flow Schedule Run
+
 on:
   workflow_dispatch: # 允许手动触发
   schedule: # 定时任务
-    - cron: "0 1 * * *" # 每天 1:00 UTC（对应北京时间 9:00）
+    - cron: "0 1 * * *" # 每天 1:00 UTC（北京时间 9:00）
+
 jobs:
   run-main:
     timeout-minutes: 20
     runs-on: ubuntu-latest
     environment: user-data
+    
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
+
     - name: Test Douyin Accessibility
       run: |
+        # 简单检查网络环境
         curl -I https://creator.douyin.com/
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
     - name: Ensure browsers are installed
-      run: playwright install chromium --with-deps --only-shell
+      # --with-deps 需要 sudo 权限来安装系统级库文件
+      run: npx playwright install chromium --with-deps
+
     - name: Run DouYin Spark Flow
       env:
         USER_DATA: ${{ secrets.USER_DATA }}
+        # 关键：强制 Playwright 在 Linux 无头模式下运行，避免由于缺少显示设备报错
+        PYTHONUNBUFFERED: 1
       run: python main.py --doTask
+
+    # --- 核心改进：无论成功还是失败，只要产生截图就上传 ---
+    - name: Upload Debug Screenshots
+      if: always() 
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-debug-logs
+        path: ./*.png
+        retention-days: 3
+
   workflow-keepalive:
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
