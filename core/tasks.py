@@ -3,6 +3,7 @@ from utils.logger import setup_logger
 from utils.config import get_config, get_userData
 from core.msg_builder import build_message, build_message_with_openai
 from core.browser import get_browser
+from utils.notification import NotificationService
 import time
 
 
@@ -203,8 +204,8 @@ def do_user_task(browser, username, cookies, targets):
 
         logger.debug(f"账号 {username} 开始发送消息")
         # 滚动并选择用户
-        for username in scroll_and_select_user(page, username, targets):
-            logger.debug(f"账号 {username} 已选中好友 {username} 发送消息")
+        for target_name in scroll_and_select_user(page, username, targets):
+            logger.debug(f"账号 {username} 已选中好友 {target_name} 发送消息")
             # 等待聊天输入框元素加载完成，使用更稳定的属性选择器
             chat_input_selector = "xpath=//div[contains(@class, 'chat-input-')]"
             page.wait_for_selector(chat_input_selector, timeout=config["browserTimeout"])
@@ -219,9 +220,9 @@ def do_user_task(browser, username, cookies, targets):
                     chat_input.press("Shift+Enter")  # 模拟 Shift+Enter 插入换行
 
             logger.debug(
-                f"账号 {username} 准备发送消息给好友 {username}：\n\t{message}"
+                f"账号 {username} 准备发送消息给好友 {target_name}：\n\t{message}"
             )
-            logger.debug(f"账号 {username} 给好友 {username} 发送消息完成")
+            logger.debug(f"账号 {username} 给好友 {target_name} 发送消息完成")
             # 模拟按下回车键发送消息
             chat_input.press("Enter")
             time.sleep(2)  # 发送完等待一会儿
@@ -229,8 +230,26 @@ def do_user_task(browser, username, cookies, targets):
         context.close()  # 任务完成后关闭上下文
 
 
+def build_run_summary(results):
+    success_count = sum(1 for item in results if item["status"] == "success")
+    fail_count = len(results) - success_count
+    lines = [
+        "抖音火花任务执行完成",
+        f"总账号数：{len(results)}",
+        f"成功：{success_count}",
+        f"失败：{fail_count}",
+        "",
+        "账号详情：",
+    ]
+    for item in results:
+        status_icon = "✅" if item["status"] == "success" else "❌"
+        lines.append(f"{status_icon} {item['username']} - {item['detail']}")
+    return "\n".join(lines)
+
+
 def runTasks():
     playwright, browser = get_browser()
+    results = []
     try:
         # 检查是否启用多任务和任务数量
         # 创建信号量以限制并发任务数量
@@ -247,14 +266,22 @@ def runTasks():
             complates[user["unique_id"]] = []  # 初始化该用户的已完成列表
             username = user.get("username", "未知用户")
             logger.info(f"开始处理账号 {username}")
-            # 创建任务
-            do_user_task(browser, username, cookies, targets)
-            logger.info(f"账号 {username} 任务完成")
+            try:
+                # 创建任务
+                do_user_task(browser, username, cookies, targets)
+                logger.info(f"账号 {username} 任务完成")
+                results.append({"username": username, "status": "success", "detail": "执行成功"})
+            except Exception as e:
+                logger.error(f"账号 {username} 任务失败: {e}")
+                results.append({"username": username, "status": "failed", "detail": f"执行失败: {e}"})
     finally:
+        if results:
+            summary = build_run_summary(results)
+            logger.info(f"任务结果汇总：\n{summary}")
+            NotificationService(config).send(summary)
         # 关闭浏览器实例
         browser.close()
         
         playwright.stop()
 
         
-
