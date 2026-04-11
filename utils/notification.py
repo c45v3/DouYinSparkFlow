@@ -12,13 +12,23 @@ class NotificationService:
         self.config = config
 
     def send(self, message: str):
-        title = self.config.get("notifyTitle", "DouYin Spark Flow 任务结果")
+        title = (self.config.get("notifyTitle") or "DouYin Spark Flow 任务结果").strip()
+
+        bark_configured = bool(self.config.get("barkServerUrl") and self.config.get("barkDeviceKey"))
+        server3_configured = bool(self.config.get("server3SendKey"))
         delivered = [
             self._send_bark(title, message),
             self._send_server3(title, message),
         ]
-        if not any(delivered):
+
+        if any(delivered):
+            return True
+
+        if bark_configured or server3_configured:
+            logger.warning("通知渠道已配置，但本次推送均失败，请检查上方回执日志")
+        else:
             logger.info("未配置通知渠道，已跳过结果推送")
+        return False
 
     def _send_bark(self, title: str, message: str) -> bool:
         server = self.config.get("barkServerUrl")
@@ -65,9 +75,10 @@ class NotificationService:
 
                 data = response.json()
                 detail = data.get("data") or {}
+                top_error = data.get("error")
                 logger.info(
                     "Server酱3 业务回执: "
-                    f"code={data.get('code')}, message={data.get('message')}, "
+                    f"code={data.get('code')}, message={data.get('message')}, top_error={top_error}, "
                     f"pushid={detail.get('pushid')}, errno={detail.get('errno')}, error={detail.get('error')}, readkey={detail.get('readkey')}"
                 )
 
