@@ -32,16 +32,15 @@ jobs:
         FRIEND_LIST_WAIT_TIME: ${{ vars.FRIEND_LIST_WAIT_TIME }}
         TASK_RETRY_TIMES: ${{ vars.TASK_RETRY_TIMES }}
         LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+        NOTIFY_TITLE: ${{ vars.NOTIFY_TITLE }}
+        BARK_SERVER_URL: ${{ vars.BARK_SERVER_URL }}
+        BARK_DEVICE_KEY: ${{ secrets.BARK_DEVICE_KEY }}
+        SERVER3_SEND_KEY: ${{ secrets.SERVER3_SEND_KEY }}
         TASKS: ${{ vars.TASKS }}
         SECRETS_JSON: ${{ toJson(secrets) }}
       run: python utils/export_github_env.py
     - name: Run DouYin Spark Flow
       run: python main.py
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: run-logs
-        path: logs/
   workflow-keepalive:
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest

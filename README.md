@@ -50,6 +50,10 @@
 |好友列表等待时间|默认即可，自建服务器部署根据网络情况调整|数字类型，单位毫秒|基本无需更改|
 |任务重试次数|默认即可，自建服务器部署根据网络情况调整|数字类型，单位次|基本无需更改|
 |输出日志级别|Error<Warning<Info<Debug，越小打印输出日志越少|Error、Warning、Info、Debug|默认为Info,建议根据需要更改为Debug获取更多调试信息|
+|通知标题|任务结束推送通知时展示的标题|字符串|可选，默认 `DouYin Spark Flow 任务结果`|
+|Bark服务地址|Bark推送服务的域名（含协议）|如 `https://api.day.app`|可选，不填则不启用 Bark|
+|Bark设备Key|Bark 设备 key|字符串|可选，和 Bark服务地址 一起填写后生效|
+|Server酱3 SendKey|Server酱3 的 SendKey|字符串|可选，填写后启用 Server酱3 通知|
 |用户名|当前任务账号的用户名仅用作标识|字符串|[抖音创作者中心](https://creator.douyin.com/)获取|
 |抖音号|当前任务账号的抖音号|根据账户页面填写|[抖音创作者中心](https://creator.douyin.com/)获取|
 |Cookies|当前任务账号的Cookies|根据账户页面填写，需要导出为json|登录[抖音创作者中心](https://creator.douyin.com/)后，使用[Cookie-Editor](https://cookie-editor.com/)浏览器扩展获取|
@@ -81,6 +85,16 @@
 2. 安装依赖`pip install -r requirements.txt`
 3. 在项目根目录下创建`.env`文件，点击配置生成器左侧最下方` 复制 .env 配置文件 `按钮，得到内容粘贴到`.env`文件中
 4. 项目根目录下执行`python main.py`
+
+### 5. 任务结果通知（可选）
+
+脚本会在全部账号执行完成后推送汇总通知（包含成功/失败数量和每个账号结果）。
+
+- Bark 通知：配置 `BARK_SERVER_URL` + `BARK_DEVICE_KEY`
+- Server酱3 通知：配置 `SERVER3_SEND_KEY`
+- 自定义通知标题：配置 `NOTIFY_TITLE`
+
+如果以上变量都未配置，脚本将跳过通知推送，仅输出日志。
 
 ## 💬 问题解答
 
