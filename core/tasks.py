@@ -233,18 +233,11 @@ def do_user_task(browser, username, cookies, targets):
 def build_run_summary(results):
     success_count = sum(1 for item in results if item["status"] == "success")
     fail_count = len(results) - success_count
-    lines = [
-        "抖音火花任务执行完成",
-        f"总账号数：{len(results)}",
-        f"成功：{success_count}",
-        f"失败：{fail_count}",
-        "",
-        "账号详情：",
-    ]
-    for item in results:
-        status_icon = "✅" if item["status"] == "success" else "❌"
-        lines.append(f"{status_icon} {item['username']} - {item['detail']}")
-    return "\n".join(lines)
+
+    if fail_count == 0:
+        return "执行成功"
+
+    return "执行失败"
 
 
 def runTasks():
